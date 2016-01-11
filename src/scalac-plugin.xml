@@ -1,0 +1,4 @@
+<plugin>
+  <name>dynprog</name>
+  <classname>de.unikl.reitzig.paralleldynprog.automation.DynamicProgrammingPlugin</classname>
+</plugin>

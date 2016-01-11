@@ -1,0 +1,73 @@
+<project name="dpplugin" basedir="." default="dist">
+  <property environment="env" />
+  <property name="scala.home" location="${env.SCALA_HOME}" />
+
+  <property name="src" location="src"/>
+  <property name="build" location="build"/>
+  <property name="lib" location="lib"/>
+  <property name="dist" location="dist"/>
+
+  <target name="clean">
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+  </target>
+
+  <target name="init">
+    <taskdef resource="scala/tools/ant/antlib.xml">
+      <classpath>
+        <pathelement location="${scala.home}/lib/scala-compiler.jar"   />
+        <pathelement location="${scala.home}/lib/scala-library.jar"   />
+      </classpath>
+    </taskdef>
+  </target>
+
+  <target name="compile" depends="init">
+    <mkdir dir="${build}"/>
+    <scalac srcdir="${src}" destdir="${build}" target="jvm-1.5">
+      <classpath>
+        <fileset dir="${lib}">
+          <include name="**/*.jar" />
+        </fileset>
+        <pathelement location="${scala.home}/lib/scala-compiler.jar" />
+        <pathelement location="${scala.home}/lib/scala-library.jar"   />
+      </classpath>
+    </scalac>
+
+    <unjar dest="${build}">
+      <fileset dir="${lib}">
+          <include name="*.jar"/>
+      </fileset>
+    </unjar>
+    <delete dir="${build}/META-INF"/>
+  </target>
+
+  <target name="dist" depends="compile" description="generate the distribution">
+    <!-- Create the distribution directory -->
+    <mkdir dir="${dist}"/>
+
+    <manifest file="MANIFEST.MF">
+    </manifest>
+
+    <jar jarfile="${dist}/dpplugin.jar" manifest="MANIFEST.MF" excludes="**/*.scala">
+      <fileset dir="${build}" includes="**/*" excludes="**/examples/*,**/examples"/>
+      <fileset file="${src}/scalac-plugin.xml"/>
+    </jar>
+
+    <jar jarfile="${dist}/dpplugin_withsources.jar" manifest="MANIFEST.MF">
+      <fileset dir="${build}" includes="**/*"/>
+      <fileset dir="${src}" includes="**/*"/>
+    </jar>
+
+    <jar jarfile="${dist}/dpruntime.jar" manifest="MANIFEST.MF" excludes="**/*.scala">
+      <fileset dir="${build}" includes="de/unikl/reitzig/paralleldynprog/runtime/*"/>
+    </jar>
+
+    <jar jarfile="${dist}/dpuser.jar" manifest="MANIFEST.MF">
+      <fileset dir="${build}" includes="de/unikl/reitzig/paralleldynprog/automation/*.class"
+                              excludes="**/DynamicProgrammingPlugin*"/>
+      <fileset dir="${src}" includes="de/unikl/reitzig/paralleldynprog/automation/package.scala"/>
+    </jar>
+
+    <delete file="MANIFEST.MF"/>
+  </target>
+</project>
